@@ -216,14 +216,12 @@ var obj = {
 <h2>4. <code>new</code> Binding</h2>
 <p>When a function is invoked with <code>new</code> in front of it (constructor call), 4 thing happen:</p>
 <ol>
-<li>a brand new object is created</li>
-<li>the newly constructed object is [[Prototype]]-linked</li>
-<li>the newly constructed object is set as the <code>this</code> binding for that function call</li>
-<li>the newly constructed object is returned (unless the function returns its own alternate object).</li>
+<li>An empty object is created and referenced by <code>this</code> variable, inheriting the prototype of the function</li>
+<li>Properties and methods are added to the object referenced by <code>this</code></li>
+<li>the newly created object referenced by <code>this</code> is returned at the end implicitly (unless the function returns its own alternate object).</li>
 </ol>
 </section>
 <section >
-<p>We'll skip over step 2, but steps 1, 3, and 4 apply to our current discussion.</p>
 <pre><code>function foo(a) {
 	this.a = a;
 }
