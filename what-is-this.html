@@ -1,0 +1,289 @@
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>reveal.js – The HTML Presentation Framework</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/night.css" id="theme">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+
+		<link rel="stylesheet" href="css/custom.css">
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section >
+<h1>What is <code>this</code>?</h1>
+<p>Francesco Bedussi</p>
+<p>Code samples and concepts are from <a href="https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/">You Don't Know JS: this &amp; Object Prototypes</a>, <a href="https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch1.md">chapter 1</a> and <a href="https://github.com/getify/You-Dont-Know-JS/blob/master/this%20%26%20object%20prototypes/ch2.md">2</a>, errors are mine :-)</p>
+</section>
+<section >
+<section >
+<h2><code>this</code> isn't</h2>
+<ul>
+<li>itself</li>
+</ul>
+<pre><code>function foo(num) {
+	console.log( &quot;foo: &quot; + num );
+
+	// keep track of how many times `foo` is called
+	this.count++;
+}
+
+foo.count = 0;
+
+var i;
+
+for (i=0; i&lt;10; i++) {
+	if (i &gt; 5) {
+		foo( i );
+	}
+}
+// foo: 6
+// foo: 7
+// foo: 8
+// foo: 9
+
+// how many times was `foo` called?
+console.log( foo.count ); // 0 -- WTF?
+</code></pre>
+</section>
+<section >
+<ul>
+<li>its scope</li>
+</ul>
+<pre><code>function foo() {
+	var a = 2;
+	this.bar();
+}
+
+function bar() {
+	console.log( this.a );
+}
+
+foo(); //undefined
+</code></pre>
+<p><code>this</code> is not an author-time binding</p>
+</section>
+</section>
+<section >
+<h2><code>this</code> is</h2>
+<p><code>this</code> is a runtime binding, it depends on the call-site: the location in code where a function is called, not where it's declared.</p>
+</section>
+<section >
+<h2>1. Default binding</h2>
+<p>If no other rules apply <code>this</code> refers to the global object (e.g. <code>window</code>) in non <code>strict-mode</code>, while is <code>undefined</code> in <code>strict-mode</code>.</p>
+<pre><code>function foo() {
+	console.log( this.a );
+}
+
+a = 2;
+
+foo(); // 2
+</code></pre>
+</section>
+<section >
+<section >
+<h2>2. Implicit binding</h2>
+<p>If a function is called as an object method, <code>this</code> refers to that object.</p>
+<pre><code>function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2,
+	foo: foo
+};
+
+obj.foo(); // 2
+</code></pre>
+</section>
+<section >
+<h3>Alert: implicitly lost</h3>
+<p>If the function is not called but simply passed, when it will be called the <code>this</code> reference is lost:</p>
+<pre><code>function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2,
+	foo: foo
+};
+
+var bar = obj.foo; // function reference/alias!
+
+var a = &quot;oops, global&quot;; // `a` also property on global object
+
+bar(); // &quot;oops, global&quot;
+</code></pre>
+</section>
+<section >
+<p>Or the more common:</p>
+<pre><code>function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2,
+	foo: foo
+};
+
+var a = &quot;oops, global&quot;; // `a` also property on global object
+
+setTimeout( obj.foo, 100 ); // &quot;oops, global&quot;
+</code></pre>
+</section>
+</section>
+<section >
+<section >
+<h2>3. Explicit binding</h2>
+<p>It is possible to explicitly bind <code>this</code> to a specific context using <code>.call()</code> or <code>.apply()</code> methods that are available to every JS function.</p>
+<pre><code>function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2
+};
+
+foo.call( obj ); // 2
+</code></pre>
+</section>
+<section >
+<h3>Hard binding</h3>
+<p><code>.call()</code> or <code>.apply()</code> provide a temporary binding, to get a permanent one, use <code>.bind</code>, that returns a new function with <code>this</code> permanently binded to the <code>.bind</code> argument:</p>
+<pre><code>function foo() {
+	console.log( this.a );
+}
+
+var obj = {
+	a: 2,
+	foo: foo
+};
+
+var a = &quot;oops, global&quot;; // `a` also property on global object
+
+setTimeout( foo.bind(obj), 100 ); // 2
+</code></pre>
+</section>
+<section >
+<h3>API Call &quot;Contexts&quot;</h3>
+<p>Many libraries' functions, and many new built-in functions in JS, provide an optional parameter, usually called &quot;context&quot;, which acts as a work-around for not having to use bind(..):</p>
+<pre><code>function foo(el) {
+	console.log( el, this.id );
+}
+
+var obj = {
+	id: &quot;awesome&quot;
+};
+
+// use `obj` as `this` for `foo(..)` calls
+[1, 2, 3].forEach( foo, obj ); // 1 awesome  2 awesome  3 awesome
+</code></pre>
+</section>
+</section>
+<section >
+<section >
+<h2>4. <code>new</code> Binding</h2>
+<p>When a function is invoked with <code>new</code> in front of it (constructor call), 4 thing happen:</p>
+<ol>
+<li>a brand new object is created</li>
+<li>the newly constructed object is [[Prototype]]-linked</li>
+<li>the newly constructed object is set as the <code>this</code> binding for that function call</li>
+<li>the newly constructed object is returned (unless the function returns its own alternate object).</li>
+</ol>
+</section>
+<section >
+<p>We'll skip over step 2, but steps 1, 3, and 4 apply to our current discussion.</p>
+<pre><code>function foo(a) {
+	this.a = a;
+}
+
+var bar = new foo( 2 );
+console.log( bar.a ); // 2
+</code></pre>
+</section>
+</section>
+<section >
+<h2>Order of rules</h2>
+<p>All you need to do is find the call-site and inspect it to see which rule applies. But, what if the call-site has multiple eligible rules? The order of precedence to these rules (from lowest to highest priority) is:</p>
+<ol>
+<li>Default binding</li>
+<li>Implicit binding</li>
+<li>Explicit binding</li>
+<li><code>new</code> Binding</li>
+</ol>
+</section>
+<section >
+<h2>Arrow functions</h2>
+<p>Arrow functions don't obey to these 4 rule, but adopt the <code>this</code> binding from the enclosing (function or global) scope.
+The most common use-case is in the use of callbacks, such as event handlers or timers:</p>
+<pre><code>function foo() {
+	setTimeout(() =&gt; {
+		// `this` here is lexically adopted from `foo()`
+		console.log( this.a );
+	},100);
+}
+
+var obj = {
+	a: 2
+};
+
+foo.call( obj ); // 2
+</code></pre>
+</section>
+
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// More info https://github.com/hakimel/reveal.js#configuration
+			{
+				let configuration = {"controls":true,"progress":true,"slideNumber":false,"history":false,"keyboard":true,"overview":true,"center":true,"touch":true,"loop":false,"rtl":false,"shuffle":false,"fragments":true,"embedded":false,"help":true,"showNotes":false,"autoSlideStoppable":true,"mouseWheel":false,"hideAddressBar":true,"previewLinks":false,"transition":"none","transitionSpeed":"default","backgroundTransition":"default","autoSlide":0,"viewDistance":3,"parallaxBackgroundImage":"","parallaxBackgroundSize":"","parallaxBackgroundHorizontal":null,"parallaxBackgroundVertical":null};
+				configuration.dependencies = [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				];
+				Reveal.initialize(configuration);
+			}
+		</script>
+
+	</body>
+</html>
