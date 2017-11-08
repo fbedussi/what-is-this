@@ -10,6 +10,8 @@ var obj = {
 	foo: foo
 };
 
+//obj.foo();
 var bar = obj.foo; // function reference/alias!
 
 bar();
+//foo()

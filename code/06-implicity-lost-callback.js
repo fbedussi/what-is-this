@@ -10,3 +10,6 @@ var obj = {
 };
 
 setTimeout( obj.foo, 100 );
+// setTimeout(function() {
+// 	obj.foo();
+// }, 100 );
